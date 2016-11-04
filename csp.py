@@ -38,6 +38,8 @@ class BinaryCSP:
     # Note: this can be overridden by a subclass that wants to define conflicts
     # in a way other than an explicit dictionary of all constraints
     def conflicted(self, var1, val1, var2, val2):
+        if val1 == None or val2 == None:
+            return False
         if (min(var1, var2), max(var1, var2)) not in self.constraints:
             return False
         # Constraint keys and arguments take the lower-valued variable first
@@ -56,6 +58,10 @@ class BinaryCSP:
         return [self.conflicted(var, val, var2, self.values[var2])
                 for var2 in range(len(self.values)) if var2 != var].count(True)
 
+    # Returns the total number of constraints violated
+    def total_conflicts(self):
+        return sum([self.num_conflicts(var, self.values[var]) for var in range(len(self.values))])/2
+
     # Return true iff the assignment is complete (each variable has a value)
     def is_complete(self):
         return None not in self.values
@@ -73,11 +79,6 @@ class BinaryCSP:
             if not constraint(self.values[var_a], self.values[var_b]):
                 return False
         return True
-
-    # Check whether the constraint between var1 and var2 would be violated with
-    # the assignment var1=val1, var2=val2.  This function should be overridden
-    # by subclasses with too many constraints to list explicitly (e.g. sudoku)
-    # def constraint_satisfied(var1, var2, val1, val2):
 
     # Enforce arc consistency on the arc tail -> head
     # Return True if any changes were made
